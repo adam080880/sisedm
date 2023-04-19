@@ -58,7 +58,7 @@
             <li class="nav-item">
               <a href="/pegawai/add.php" class="nav-link">
                 <i class="nav-icon fas fa-plus"></i>
-                <p>Tambah Pegawai</p>
+                <p>Tambah</p>
               </a>
             </li>
           </ul>
@@ -76,6 +76,29 @@
               <a href="/pegawai" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
                 <p>Daftar</p>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">
+            <i class="nav-icon fas fa-check"></i>
+            <p>
+              Absensi
+              <i class="fas fa-angle-left right"></i>
+            </p>
+          </a>
+          <ul class="nav nav-treeview">
+            <li class="nav-item">
+              <a href="/pegawai" class="nav-link">
+              <i class="nav-icon fas fa-table"></i>
+                <p>Daftar</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/pegawai" class="nav-link">
+              <i class="nav-icon fas fa-plus"></i>
+                <p>Tambah</p>
               </a>
             </li>
           </ul>
