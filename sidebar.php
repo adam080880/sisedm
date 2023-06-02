@@ -67,13 +67,13 @@
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-money-bill"></i>
             <p>
-              Gaji
+              Gaji Harian Pegawai
               <i class="fas fa-angle-left right"></i>
             </p>
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/pegawai" class="nav-link">
+              <a href="/gaji" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
                 <p>Daftar</p>
               </a>

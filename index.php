@@ -1,49 +1,81 @@
 <?php
-$dayInThisMonth = 30;
 
-$dataAbsen = [
-  [
-    'nama' => 'Hibban Rafa Misbah',
-    'divisi' => 'Programmer',
-    'absence' => 21,
-  ],
-  [
-    'nama' => 'Prio Arief Gunawan',
-    'divisi' => 'Programmer',
-    'absence' => 20,
-  ],
-  [
-    'nama' => 'Muhamad Adam',
-    'divisi' => 'Tukang Kebun',
-    'absence' => 19,
-  ],
-];
+require('database.php');
 
-$dataGaji = [
-  [
-    'nama' => 'Hibban Rafa Misbah',
-    'divisi' => 'Programmer',
-    'gaji' => 25000000,
-    'absence' => 21,
-  ],
-  [
-    'nama' => 'Prio Arief Gunawan',
-    'divisi' => 'Programmer',
-    'gaji' => 25000000,
-    'absence' => 20,
-  ],
-  [
-    'nama' => 'Muhamad Adam',
-    'divisi' => 'Tukang Kebun',
-    'gaji' => 4500000,
-    'absence' => 19,
-  ],
-];
+$month = date('m');
+$formattedMonth = date('M');
+$year = date('Y');
+$dayInThisMonth = cal_days_in_month(CAL_GREGORIAN, +$month, +$year);
 
-$totalPegawai = 10;
-$totalGajiBulanIni = 37016667;
-$totalDivisi = 5;
-$persentaseAbsensiRataRata = 66.66;
+$totalPegawaiQuery = $conn->query('SELECT COUNT(id) as countPegawai FROM pegawai;');
+$totalPegawai = $totalPegawaiQuery->fetch_assoc()['countPegawai'];
+
+$totalDivisiQuery = $conn->query("
+SELECT COUNT(countDivisiSubQuery.countDivisi) as countDivisi FROM (
+	SELECT COUNT(divisi) as countDivisi FROM pegawai GROUP BY divisi
+) as countDivisiSubQuery;
+");
+$totalDivisi = $totalDivisiQuery->fetch_assoc()['countDivisi'];
+
+$totalGajiBulanIniQuery = $conn->query("
+  SELECT SUM(absence * gaji) as sumTotalGaji FROM (
+    SELECT pegawai.id, COUNT(absensi.id) as absence, gaji.gaji as gaji
+    FROM pegawai
+    LEFT JOIN absensi ON pegawai.id = absensi.pegawai_id
+    LEFT JOIN gaji ON pegawai.id = gaji.pegawai_id
+    WHERE MONTH(absensi.tgl_absen) = $month AND YEAR(absensi.tgl_absen) = $year
+    GROUP BY pegawai.id
+  ) as totalGajiSubQuery;
+");
+$sumTotalGaji = $totalGajiBulanIniQuery->fetch_assoc();
+$totalGajiBulanIni = $sumTotalGaji['sumTotalGaji'] ? $sumTotalGaji['sumTotalGaji'] : 0;
+
+$absenceMetadataQuery = $conn->query("
+  SELECT (
+    SELECT SUM(absence.countAbsence) as sumCountAbsence
+    FROM (
+      SELECT pegawai.id, COUNT(absensi.id) as countAbsence
+      FROM pegawai
+      LEFT JOIN absensi ON absensi.pegawai_id = pegawai.id
+      WHERE MONTH(absensi.tgl_absen) = $month AND YEAR(absensi.tgl_absen) = $year
+      GROUP BY pegawai.id
+    ) AS absence
+  ) as sumCountAbsence,
+  (SELECT COUNT(id) FROM pegawai) as countPegawai;
+");
+$absenceMetadata = $absenceMetadataQuery->fetch_assoc();
+$avgAbsence = $absenceMetadata['sumCountAbsence'] / $absenceMetadata['countPegawai'];
+$persentaseAbsensiRataRata = number_format(($avgAbsence / $dayInThisMonth) * 100, 2, '.', '');
+
+$dataAbsenQuery = $conn->query("
+  SELECT pegawai.*, COUNT(absensi.id) absence
+  FROM pegawai LEFT JOIN absensi ON pegawai.id = absensi.pegawai_id
+  WHERE MONTH(absensi.tgl_absen) = $month AND YEAR(absensi.tgl_absen) = $year
+  GROUP BY pegawai.id
+  ORDER BY COUNT(absensi.id) DESC
+  LIMIT 5;
+");
+$dataAbsen = [];
+
+while ($absen = $dataAbsenQuery->fetch_assoc()) {
+  $dataAbsen[] = $absen;
+}
+
+$dataGajiQuery = $conn->query("
+  SELECT pegawai.*, COUNT(absensi.id) as absence, gaji.gaji as gaji, gaji.gaji * COUNT(absensi.id) as totalGaji
+  FROM pegawai
+  LEFT JOIN absensi ON pegawai.id = absensi.pegawai_id
+  LEFT JOIN gaji ON pegawai.id = gaji.pegawai_id
+  WHERE MONTH(absensi.tgl_absen) = $month AND YEAR(absensi.tgl_absen) = $year
+  GROUP BY pegawai.id
+  ORDER BY gaji.gaji * COUNT(absensi.id) DESC
+  LIMIT 5;
+");
+$dataGaji = [];
+
+while ($gaji = $dataGajiQuery->fetch_assoc()) {
+  $dataGaji[] = $gaji;
+}
 
 ?>
 
@@ -119,7 +151,7 @@ $persentaseAbsensiRataRata = 66.66;
             <div class="inner">
               <h3><?= number_format($totalGajiBulanIni, 0, ',', '.') ?></h3>
 
-              <p>Total Gaji Bulan Ini (Apr 2023)</p>
+              <p>Total Gaji Bulan Ini (<?= $formattedMonth ?> <?= $year ?>)</p>
             </div>
             <div class="icon">
               <i class="ion ion-person-add"></i>
@@ -134,7 +166,7 @@ $persentaseAbsensiRataRata = 66.66;
         <div class="col-sm-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Top 5 Absensi Bulan Ini (Apr 2023)</h3>
+              <h3 class="card-title">Top 5 Absensi Bulan Ini (<?= $formattedMonth ?> <?= $year ?>)</h3>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -174,7 +206,7 @@ $persentaseAbsensiRataRata = 66.66;
         <div class="col-sm-6">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">Top 5 Gaji Karyawan Prorate kehadiran (Apr 2023)</h3>
+              <h3 class="card-title">Top 5 Gaji Karyawan Prorate kehadiran (<?= $formattedMonth ?> <?= $year ?>)</h3>
             </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -184,7 +216,7 @@ $persentaseAbsensiRataRata = 66.66;
                     <th>No</th>
                     <th>Nama</th>
                     <th>Divisi</th>
-                    <th>Nominal (Apr 2023)</th>
+                    <th>Nominal (<?= $formattedMonth ?> <?= $year ?>)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -194,7 +226,7 @@ $persentaseAbsensiRataRata = 66.66;
                       <td><?= ++$index ?></td>
                       <td><?= $d['nama'] ?></td>
                       <td><?= $d['divisi'] ?></td>
-                      <td><?= number_format($d['gaji'] * $d['absence'] / $dayInThisMonth, 0, ',', '.') ?></td>
+                      <td><?= number_format($d['totalGaji'] ? $d['totalGaji'] : 0, 0, ',', '.') ?></td>
                     </tr>
                   <?php endforeach ?>
                 </tbody>
@@ -203,7 +235,7 @@ $persentaseAbsensiRataRata = 66.66;
                     <th>No</th>
                     <th>Nama</th>
                     <th>Divisi</th>
-                    <th>Nominal (Apr 2023)</th>
+                    <th>Nominal (<?= $formattedMonth ?> <?= $year ?>)</th>
                   </tr>
                 </tfoot>
               </table>
