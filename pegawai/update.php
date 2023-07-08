@@ -1,12 +1,25 @@
 <?php
 require('../database.php');
 
+if (isset($_GET['id'])) {
+  $id = $_GET['id'];
+
+  // Fetch the record from the database
+  $sql = "SELECT * FROM pegawai WHERE id = $id";
+  $result = $conn->query($sql);
+  $row = $result->fetch_assoc();
+
+  if (!$row) {
+    header("Refresh:0;url=index.php");
+  }
+}
+
 if (isset($_POST['submit'])) {
+  $id = $_POST['id'];
   $nama = mysqli_real_escape_string($conn, $_POST['nama']);
   $divisi = mysqli_real_escape_string($conn, $_POST['divisi']);
 
-  $sql = "INSERT INTO pegawai (nama, divisi)
-        VALUES ('$nama', '$divisi')";
+  $sql = "UPDATE pegawai SET nama = '$nama', divisi = '$divisi' WHERE id = $id";
 
   $conn->query($sql);
   if ($conn->affected_rows) {
@@ -14,6 +27,8 @@ if (isset($_POST['submit'])) {
     exit;
   }
 }
+
+
 
 ?>
 
@@ -32,7 +47,7 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Tambah Pegawai</h1>
+          <h1 class="m-0">Edit Pegawai</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
@@ -52,17 +67,18 @@ if (isset($_POST['submit'])) {
         <div class="card-body">
           <div class="form-group">
             <label for="nama">Nama Pegawai</label>
-            <input name="nama" type="text" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
+            <input value="<?= $row['id']; ?>" name="id" type="hidden" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
+            <input value="<?= $row['nama']; ?>" name="nama" type="text" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
           </div>
           <div class="form-group">
             <label for="divisi">Divisi</label>
-            <input name="divisi" type="text" class="form-control" id="divisi" placeholder="Masukan Divisi">
+            <input value="<?= $row['divisi']; ?>" name="divisi" type="text" class="form-control" id="divisi" placeholder="Masukan Divisi">
           </div>
         </div>
         <!-- /.card-body -->
 
         <div class="card-footer">
-          <button name="submit" type="submit" class="btn btn-primary">Tambah</button>
+          <button name="submit" type="submit" class="btn btn-primary">Ubah Data</button>
         </div>
       </form>
     </div>

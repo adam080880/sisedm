@@ -1,12 +1,25 @@
 <?php
 require('../database.php');
 
-if (isset($_POST['submit'])) {
-  $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-  $divisi = mysqli_real_escape_string($conn, $_POST['divisi']);
+if (isset($_GET['id'])) {
+  $id = $_GET['id'];
 
-  $sql = "INSERT INTO pegawai (nama, divisi)
-        VALUES ('$nama', '$divisi')";
+  // Fetch the record from the database
+  $sql = "SELECT * FROM absensi WHERE id = $id";
+  $result = $conn->query($sql);
+  $row = $result->fetch_assoc();
+
+  if (!$row) {
+    header("Refresh:0;url=index.php");
+  }
+}
+
+if (isset($_POST['submit'])) {
+  $id = $_POST['id'];
+  $tgl_absen = mysqli_real_escape_string($conn, $_POST['date']);
+  $newDate = date("Y-m-d", strtotime($tgl_absen));
+
+  $sql = "UPDATE absensi SET tgl_absen = '$newDate' WHERE id = $id";
 
   $conn->query($sql);
   if ($conn->affected_rows) {
@@ -32,12 +45,12 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Tambah Pegawai</h1>
+          <h1 class="m-0">Ubah Data Absensi Pegawai</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-            <li class="breadcrumb-item active">Pegawai</li>
+            <li class="breadcrumb-item active">Absensi Pegawai</li>
           </ol>
         </div><!-- /.col -->
       </div><!-- /.row -->
@@ -50,19 +63,21 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
       <form method="post" action="">
         <div class="card-body">
+          <input type="hidden" name="id" value="<?= $row['id'] ?>">
           <div class="form-group">
-            <label for="nama">Nama Pegawai</label>
-            <input name="nama" type="text" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
-          </div>
-          <div class="form-group">
-            <label for="divisi">Divisi</label>
-            <input name="divisi" type="text" class="form-control" id="divisi" placeholder="Masukan Divisi">
+            <label>Date:</label>
+            <div class="input-group date" id="reservationdate" data-target-input="nearest">
+              <input value="<?= date("m/d/Y", strtotime($row['tgl_absen'])); ?>" name="date" type="text" class="form-control datetimepicker-input" data-target="#reservationdate" />
+              <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+              </div>
+            </div>
           </div>
         </div>
         <!-- /.card-body -->
 
         <div class="card-footer">
-          <button name="submit" type="submit" class="btn btn-primary">Tambah</button>
+          <button name="submit" type="submit" class="btn btn-primary">Ubah Data</button>
         </div>
       </form>
     </div>
@@ -82,9 +97,18 @@ if (isset($_POST['submit'])) {
 <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
 <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
 <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Select2 -->
+<script src="../plugins/select2/js/select2.full.min.js"></script>
 
 <script>
   $(function() {
+    $('.select2').select2()
+
+    //Date picker
+    $('#reservationdate').datetimepicker({
+      format: 'L'
+    });
+
     $("#daftar_pegawai").DataTable({
       "responsive": true,
       "lengthChange": false,

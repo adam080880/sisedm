@@ -90,13 +90,13 @@
           </a>
           <ul class="nav nav-treeview">
             <li class="nav-item">
-              <a href="/pegawai" class="nav-link">
+              <a href="/absensi/index.php" class="nav-link">
               <i class="nav-icon fas fa-table"></i>
                 <p>Daftar</p>
               </a>
             </li>
             <li class="nav-item">
-              <a href="/pegawai" class="nav-link">
+              <a href="/absensi/add.php" class="nav-link">
               <i class="nav-icon fas fa-plus"></i>
                 <p>Tambah</p>
               </a>

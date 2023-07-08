@@ -1,12 +1,23 @@
 <?php
 require('../database.php');
 
-if (isset($_POST['submit'])) {
-  $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-  $divisi = mysqli_real_escape_string($conn, $_POST['divisi']);
+$sql = "SELECT * FROM pegawai";
+$result = $conn->query($sql);
 
-  $sql = "INSERT INTO pegawai (nama, divisi)
-        VALUES ('$nama', '$divisi')";
+$dataPegawai = [];
+
+while ($pegawai = $result->fetch_assoc()) {
+  $dataPegawai[] = $pegawai;
+}
+
+if (isset($_POST['submit'])) {
+  $pegawai_id = mysqli_real_escape_string($conn, $_POST['pegawai']);
+  $tgl_absen = mysqli_real_escape_string($conn, $_POST['date']);
+
+  $newDate = date("Y-m-d", strtotime($tgl_absen));
+
+  $sql = "INSERT INTO absensi (pegawai_id, tgl_absen)
+        VALUES ('$pegawai_id', '$newDate')";
 
   $conn->query($sql);
   if ($conn->affected_rows) {
@@ -32,12 +43,12 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Tambah Pegawai</h1>
+          <h1 class="m-0">Tambah Absensi Pegawai</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-            <li class="breadcrumb-item active">Pegawai</li>
+            <li class="breadcrumb-item active">Absensi Pegawai</li>
           </ol>
         </div><!-- /.col -->
       </div><!-- /.row -->
@@ -51,12 +62,22 @@ if (isset($_POST['submit'])) {
       <form method="post" action="">
         <div class="card-body">
           <div class="form-group">
-            <label for="nama">Nama Pegawai</label>
-            <input name="nama" type="text" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
+            <label>Minimal</label>
+            <select name="pegawai" class="form-control select2" style="width: 100%;">
+              <option selected="selected" disabled>Pilih Pegawai</option>
+              <?php foreach ($dataPegawai as $d) : ?>
+                <option value="<?= $d['id']; ?>"><?= $d['nama']; ?></option>
+              <?php endforeach ?>
+            </select>
           </div>
           <div class="form-group">
-            <label for="divisi">Divisi</label>
-            <input name="divisi" type="text" class="form-control" id="divisi" placeholder="Masukan Divisi">
+            <label>Date:</label>
+            <div class="input-group date" id="reservationdate" data-target-input="nearest">
+              <input name="date" type="text" class="form-control datetimepicker-input" data-target="#reservationdate" />
+              <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+              </div>
+            </div>
           </div>
         </div>
         <!-- /.card-body -->
@@ -82,9 +103,18 @@ if (isset($_POST['submit'])) {
 <script src="../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
 <script src="../plugins/datatables-buttons/js/buttons.print.min.js"></script>
 <script src="../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+<!-- Select2 -->
+<script src="../plugins/select2/js/select2.full.min.js"></script>
 
 <script>
   $(function() {
+    $('.select2').select2()
+
+    //Date picker
+    $('#reservationdate').datetimepicker({
+      format: 'L'
+    });
+
     $("#daftar_pegawai").DataTable({
       "responsive": true,
       "lengthChange": false,

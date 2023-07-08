@@ -1,21 +1,25 @@
 <?php
+
 require('../database.php');
 
-if (isset($_POST['submit'])) {
-  $nama = mysqli_real_escape_string($conn, $_POST['nama']);
-  $divisi = mysqli_real_escape_string($conn, $_POST['divisi']);
+$sql = "SELECT p.*, a.tgl_absen, a.id as absensi_id FROM absensi as a JOIN pegawai as p ON a.pegawai_id = p.id";
+$result = $conn->query($sql);
 
-  $sql = "INSERT INTO pegawai (nama, divisi)
-        VALUES ('$nama', '$divisi')";
+$dataPegawai = [];
 
-  $conn->query($sql);
-  if ($conn->affected_rows) {
-    header("Refresh:0;url=index.php");
-    exit;
-  }
+while ($pegawai = $result->fetch_assoc()) {
+  $dataPegawai[] = $pegawai;
+}
+
+
+function delete($id)
+{
+  var_dump($id);
 }
 
 ?>
+
+
 
 <?php require_once('../header.php') ?>
 
@@ -32,12 +36,12 @@ if (isset($_POST['submit'])) {
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">Tambah Pegawai</h1>
+          <h1 class="m-0">Absensi Pegawai</h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-            <li class="breadcrumb-item active">Pegawai</li>
+            <li class="breadcrumb-item active">Absensi Pegawai</li>
           </ol>
         </div><!-- /.col -->
       </div><!-- /.row -->
@@ -48,23 +52,50 @@ if (isset($_POST['submit'])) {
   <!-- main content -->
   <section class="content">
     <div class="container-fluid">
-      <form method="post" action="">
+      <a href="./add.php" class="btn btn-primary mb-3">Tambah Data</a>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Data</h3>
+        </div>
+        <!-- /.card-header -->
         <div class="card-body">
-          <div class="form-group">
-            <label for="nama">Nama Pegawai</label>
-            <input name="nama" type="text" class="form-control" id="nama" placeholder="Masukan Nama Pegawai">
-          </div>
-          <div class="form-group">
-            <label for="divisi">Divisi</label>
-            <input name="divisi" type="text" class="form-control" id="divisi" placeholder="Masukan Divisi">
-          </div>
+          <table id="daftar_pegawai" class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Divisi</th>
+                <th>Tanggal Absen</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php $index = 0 ?>
+              <?php foreach ($dataPegawai as $d) : ?>
+                <tr>
+                  <td><?= ++$index ?></td>
+                  <td><?= $d['nama'] ?></td>
+                  <td><?= $d['divisi'] ?></td>
+                  <td><?= $d['tgl_absen'] ?></td>
+                  <td>
+                    <a href="./delete.php?id=<?= $d['absensi_id']; ?>" class="btn btn-danger" onclick="confirm('Yakin?')">Hapus</a>
+                    <a href="./update.php?id=<?= $d['absensi_id']; ?>" class="btn btn-success">Ubah</a>
+                  </td>
+                </tr>
+              <?php endforeach ?>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Divisi</th>
+                <th>Aksi</th>
+              </tr>
+            </tfoot>
+          </table>
         </div>
         <!-- /.card-body -->
-
-        <div class="card-footer">
-          <button name="submit" type="submit" class="btn btn-primary">Tambah</button>
-        </div>
-      </form>
+      </div>
     </div>
   </section>
 </div>

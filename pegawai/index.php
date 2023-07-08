@@ -1,25 +1,24 @@
 <?php
-$dayInThisMonth = 30;
 
-$dataPegawai = [
-  [
-    'nama' => 'Hibban Rafa Misbah',
-    'divisi' => 'Programmer',
-    'absence' => 21,
-  ],
-  [
-    'nama' => 'Prio Arief Gunawan',
-    'divisi' => 'Programmer',
-    'absence' => 20,
-  ],
-  [
-    'nama' => 'Muhamad Adam',
-    'divisi' => 'Tukang Kebun',
-    'absence' => 19,
-  ],
-];
+require('../database.php');
+
+$sql = "SELECT * FROM pegawai";
+$result = $conn->query($sql);
+
+$dataPegawai = [];
+
+while ($pegawai = $result->fetch_assoc()) {
+  $dataPegawai[] = $pegawai;
+}
+
+
+function delete($id) {
+  var_dump($id);
+}
 
 ?>
+
+
 
 <?php require_once('../header.php') ?>
 
@@ -52,6 +51,7 @@ $dataPegawai = [
   <!-- main content -->
   <section class="content">
     <div class="container-fluid">
+      <a href="./add.php" class="btn btn-primary mb-3">Tambah Data</a>
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Data</h3>
@@ -74,7 +74,10 @@ $dataPegawai = [
                   <td><?= ++$index ?></td>
                   <td><?= $d['nama'] ?></td>
                   <td><?= $d['divisi'] ?></td>
-                  <td></td>
+                  <td>
+                    <a href="./delete.php?id=<?= $d['id']; ?>" class="btn btn-danger" onclick="confirm('Yakin?')">Hapus</a>
+                    <a href="./update.php?id=<?= $d['id']; ?>" class="btn btn-success">Ubah</a>
+                  </td>
                 </tr>
               <?php endforeach ?>
             </tbody>
