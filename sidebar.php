@@ -33,14 +33,6 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
         <li class="nav-item">
-          <a href="pages/widgets.html" class="nav-link">
-            <i class="nav-icon fas fa-th"></i>
-            <p>
-              Widgets
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
           <a href="#" class="nav-link">
             <i class="nav-icon fas fa-user"></i>
             <p>
@@ -51,7 +43,7 @@
           <ul class="nav nav-treeview">
             <li class="nav-item">
               <a href="/pegawai/index.php" class="nav-link">
-              <i class="nav-icon fas fa-table"></i>
+                <i class="nav-icon fas fa-table"></i>
                 <p>Daftar Pegawai</p>
               </a>
             </li>
@@ -102,6 +94,14 @@
               </a>
             </li>
           </ul>
+        </li>
+        <li class="nav-item">
+          <a href="/about-us.php" class="nav-link">
+            <i class="nav-icon fas fa-info"></i>
+            <p>
+              Tentang Aplikasi
+            </p>
+          </a>
         </li>
       </ul>
     </nav>
